@@ -1,64 +1,46 @@
-// import { galleryItems } from "./gallery-items.js";
-
-// const galleryEL = document.querySelector(".gallery");
-
-// galleryItems.forEach((item) => {
-//   galleryEL.insertAdjacentHTML(
-//     "beforeend",
-//     `
-//     <div class="gallery__item">
-//      <a class="gallery__link" href="${item.original}">
-//        <img class="gallery__image" src="${item.preview}" alt="${item.description}"
-//        data-source="${item.original}"/>
-//      </a>
-//     </div>`
-//   );
-// });
-
-// document.querySelector(".gallery").onclick = (event) => {
-//   event.preventDefault();
-//   const instance = basicLightbox.create(`
-// 		<img src="${event.target.dataset.source}">
-// 	`);
-//   instance.show();
-
-//   window.addEventListener("keydown", (event) => {
-//     if (event.key === "Escape") {
-//       instance.close();
-//     }
-//   });
-// };
 import { galleryItems } from "./gallery-items.js";
-// Change code below this line
 
 const galleryEl = document.querySelector(".gallery");
+const galleryFragment = document.createDocumentFragment();
 
-galleryEl.innerHTML = "";
-for (const image of galleryItems) {
-  const newImage = `<a class="gallery__link" href="${image.original}">
-    <img
-      class="gallery__image"
-      src="${image.preview}"
-      data-source="${image.original}"
-      alt="${image.description}"
-    />
-  </a>`;
-  galleryEl.innerHTML += newImage;
-}
+galleryItems.forEach((item) => {
+  const galleryItem = document.createElement("div");
+  galleryItem.classList.add("gallery__item");
 
-galleryEl.addEventListener("click", (event) => {
-  event.preventDefault();
-  const instance = basicLightbox.create(
-    `<img src="${event.target.dataset.source}"/>`,
-    {
-      onShow: (instance) => {
-        window.addEventListener("keydown", (event) => {
-          if (event.key === "Escape") {
-            instance.close();
-          }
-        });
-      },
-    }
-  );
-  instance.show();
+  const link = document.createElement("a");
+  link.classList.add("gallery__link");
+  link.href = item.original;
+
+  const image = document.createElement("img");
+  image.classList.add("gallery__image");
+  image.src = item.preview;
+  image.alt = item.description; // Dodajemy atrybut alt
+  image.dataset.source = item.original;
+
+  link.appendChild(image);
+  galleryItem.appendChild(link);
+  galleryFragment.appendChild(galleryItem);
 });
+
+galleryEl.appendChild(galleryFragment);
+
+let keyboardListener = null; // Referencja do nasłuchiwania klawiatury
+
+document.querySelector(".gallery").onclick = (event) => {
+  event.preventDefault();
+  const instance = basicLightbox.create(`
+    <img src="${event.target.dataset.source}" alt="${event.target.alt}">
+  `);
+  instance.show();
+
+  if (!keyboardListener) {
+    keyboardListener = (event) => {
+      if (event.key === "Escape") {
+        instance.close();
+        window.removeEventListener("keydown", keyboardListener);
+        keyboardListener = null;
+      }
+    };
+    window.addEventListener("keydown", keyboardListener);
+  }
+};
