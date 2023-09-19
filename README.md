@@ -1,1 +1,1 @@
-https://szczepanskimichal.github.io/goit-js-hw-07/
+https://szczepanskimichal.github.io/js-hw-07/
